@@ -2,7 +2,42 @@
 // GABON STORIES - JAVASCRIPT PRINCIPAL
 // ===================================================
 
+// ⚠️⚠️⚠️ REMPLACEZ PAR VOTRE URL DE DÉPLOIEMENT ⚠️⚠️⚠️
+// Allez dans Apps Script -> Déployer -> Nouveau déploiement -> Application Web
+// Copiez l'URL et collez-la ici :
 const API_URL = 'https://script.google.com/macros/s/AKfycbyhtcIwite2fwwKjR54E99Ur88kCIosUKSI0oofC7fmoa-c-r8-pep7bIJ_mDJ01KaEBg/exec';
+
+// ===== DIAGNOSTIC AU DÉMARRAGE =====
+(async function diagnostic() {
+  console.log('🔍 DIAGNOSTIC DÉMARRÉ');
+  console.log('URL API:', API_URL);
+  
+  // Test 1 : Initialisation
+  try {
+    const response = await fetch(API_URL + '?action=init');
+    const data = await response.json();
+    console.log('✅ Test Init:', data);
+  } catch(e) {
+    console.error('❌ ÉCHEC Init:', e.message);
+  }
+  
+  // Test 2 : Login
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'login',
+        email: 'mayialex370@gmail.com',
+        password: 'magnifique241'
+      })
+    });
+    const data = await response.json();
+    console.log('✅ Test Login:', data);
+  } catch(e) {
+    console.error('❌ ÉCHEC Login:', e.message);
+  }
+})();
 
 // ===== GESTION DE L'ÉTAT =====
 const AppState = {
@@ -13,15 +48,10 @@ const AppState = {
     this.token = localStorage.getItem('gs_token');
     const userStr = localStorage.getItem('gs_user');
     if (userStr) {
-      try { 
-        this.user = JSON.parse(userStr); 
-      } catch(e) {
-        console.error('Erreur parsing user:', e);
-        this.user = null;
-        this.token = null;
+      try { this.user = JSON.parse(userStr); } catch(e) {
+        this.logout();
       }
     }
-    console.log('AppState initialisé:', this.user ? `Connecté (${this.user.role})` : 'Non connecté');
   },
 
   login(user, token) {
@@ -29,7 +59,6 @@ const AppState = {
     this.token = token;
     localStorage.setItem('gs_token', token);
     localStorage.setItem('gs_user', JSON.stringify(user));
-    console.log('Utilisateur connecté:', user.username);
   },
 
   logout() {
@@ -51,38 +80,31 @@ const API = {
       const url = new URL(API_URL);
       url.searchParams.set('action', action);
       Object.entries(params).forEach(([k, v]) => {
-        if (v !== null && v !== undefined) {
-          url.searchParams.set(k, v.toString());
-        }
+        if (v !== null && v !== undefined) url.searchParams.set(k, v.toString());
       });
       
-      console.log('GET:', action, url.toString());
       const res = await fetch(url.toString());
-      const data = await res.json();
-      console.log('GET Response:', data);
-      return data;
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
     } catch(e) {
-      console.error('Erreur GET:', e);
-      return { success: false, message: 'Erreur réseau: ' + e.message };
+      console.error('API GET error:', e);
+      return { success: false, message: 'Erreur connexion' };
     }
   },
 
   async post(data) {
     try {
-      console.log('POST:', data.action, data);
-      
       const res = await fetch(API_URL, {
         method: 'POST',
-        body: JSON.stringify(data),
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
       });
       
-      const result = await res.json();
-      console.log('POST Response:', result);
-      return result;
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
     } catch(e) {
-      console.error('Erreur POST:', e);
-      return { success: false, message: 'Erreur réseau: ' + e.message };
+      console.error('API POST error:', e);
+      return { success: false, message: 'Erreur connexion' };
     }
   }
 };
@@ -91,27 +113,16 @@ const API = {
 function showAlert(message, type = 'success', containerId = 'alertContainer') {
   const container = document.getElementById(containerId);
   if (!container) {
-    console.warn(`Container #${containerId} non trouvé, message:`, message);
+    alert(message);
     return;
   }
-  
-  const alertDiv = document.createElement('div');
-  alertDiv.className = `alert alert-${type}`;
-  alertDiv.textContent = message;
-  container.innerHTML = '';
-  container.appendChild(alertDiv);
-  
-  setTimeout(() => { 
-    if (container.contains(alertDiv)) {
-      container.removeChild(alertDiv);
-    }
-  }, 5000);
+  container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+  setTimeout(() => { container.innerHTML = ''; }, 5000);
 }
 
 function setLoading(btnId, loading, text = 'Chargement...') {
   const btn = document.getElementById(btnId);
   if (!btn) return;
-  
   if (loading) {
     btn.disabled = true;
     btn.dataset.originalText = btn.innerHTML;
@@ -125,24 +136,15 @@ function setLoading(btnId, loading, text = 'Chargement...') {
 function formatDate(dateStr) {
   if (!dateStr) return '';
   try {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('fr-FR', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    return new Date(dateStr).toLocaleDateString('fr-FR', { 
+      year: 'numeric', month: 'long', day: 'numeric' 
     });
-  } catch(e) {
-    return dateStr;
-  }
+  } catch(e) { return dateStr; }
 }
 
 function getInitials(name) {
   if (!name) return '??';
-  return name.split(' ')
-    .map(n => n[0])
-    .join('')
-    .toUpperCase()
-    .substring(0, 2);
+  return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
 }
 
 function escapeHtml(str) {
@@ -151,18 +153,17 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
-// ===== NAVBAR DYNAMIQUE =====
+// ===== NAVBAR =====
 function renderNavbar() {
   const actionsEl = document.getElementById('navActions');
   if (!actionsEl) return;
 
   AppState.init();
-  
   if (AppState.isLoggedIn()) {
-    const dashboardLink = AppState.isAdmin() ? 'admin.html' : 'auteur.html';
+    const dashLink = AppState.isAdmin() ? 'admin.html' : 'auteur.html';
     actionsEl.innerHTML = `
-      <a href="${dashboardLink}" class="btn btn-secondary btn-sm">Tableau de bord</a>
-      <div class="avatar" onclick="handleLogout()" title="Se déconnecter" style="cursor:pointer;">
+      <a href="${dashLink}" class="btn btn-secondary btn-sm">Tableau de bord</a>
+      <div class="avatar" onclick="handleLogout()" title="Déconnexion" style="cursor:pointer;">
         ${getInitials(AppState.user.username)}
       </div>
     `;
@@ -179,10 +180,7 @@ async function handleLogout() {
     if (AppState.token) {
       await API.post({ action: 'logout', sessionToken: AppState.token });
     }
-  } catch(e) {
-    console.error('Erreur logout:', e);
-  }
-  
+  } catch(e) {}
   AppState.logout();
   window.location.href = 'index.html';
 }
@@ -211,36 +209,5 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// ===== TABS =====
-function initTabs(containerSelector) {
-  const container = document.querySelector(containerSelector);
-  if (!container) return;
-  
-  const tabs = container.querySelectorAll('.tab');
-  const contents = container.querySelectorAll('.tab-content');
-  
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      const target = tab.dataset.tab;
-      
-      tabs.forEach(t => t.classList.remove('active'));
-      contents.forEach(c => c.style.display = 'none');
-      
-      tab.classList.add('active');
-      const content = document.getElementById(target);
-      if (content) content.style.display = 'block';
-    });
-  });
-  
-  // Activer le premier tab
-  if (tabs.length > 0) {
-    tabs[0].click();
-  }
-}
-
-// Initialisation au chargement
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('App initialisée');
-  AppState.init();
-  renderNavbar();
-});
+// ===== INITIALISATION =====
+document.addEventListener('DOMContentLoaded', renderNavbar);
