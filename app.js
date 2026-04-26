@@ -1,41 +1,40 @@
 // ===================================================
 // GABON STORIES - JAVASCRIPT PRINCIPAL
+// Version anti-CORS - Utilise GET avec paramètre _data
 // ===================================================
 
-// ⚠️⚠️⚠️ REMPLACEZ PAR VOTRE URL DE DÉPLOIEMENT ⚠️⚠️⚠️
-// Allez dans Apps Script -> Déployer -> Nouveau déploiement -> Application Web
-// Copiez l'URL et collez-la ici :
 const API_URL = 'https://script.google.com/macros/s/AKfycbyhtcIwite2fwwKjR54E99Ur88kCIosUKSI0oofC7fmoa-c-r8-pep7bIJ_mDJ01KaEBg/exec';
 
-// ===== DIAGNOSTIC AU DÉMARRAGE =====
+console.log('🚀 Gabon Stories');
+console.log('📡 API URL:', API_URL);
+
+// ===== DIAGNOSTIC =====
 (async function diagnostic() {
-  console.log('🔍 DIAGNOSTIC DÉMARRÉ');
-  console.log('URL API:', API_URL);
+  console.log('🔍 DIAGNOSTIC...');
   
-  // Test 1 : Initialisation
+  // Test GET simple
   try {
-    const response = await fetch(API_URL + '?action=init');
-    const data = await response.json();
-    console.log('✅ Test Init:', data);
+    const r = await fetch(API_URL + '?action=getStats');
+    const d = await r.json();
+    console.log('✅ getStats:', d);
   } catch(e) {
-    console.error('❌ ÉCHEC Init:', e.message);
+    console.error('❌ getStats:', e.message);
   }
   
-  // Test 2 : Login
+  // Test login (via GET)
   try {
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'login',
-        email: 'mayialex370@gmail.com',
-        password: 'magnifique241'
-      })
+    const loginData = JSON.stringify({
+      email: 'mayialex370@gmail.com',
+      password: 'magnifique241'
     });
-    const data = await response.json();
-    console.log('✅ Test Login:', data);
+    const url = API_URL + '?action=login&_data=' + encodeURIComponent(loginData);
+    console.log('URL login:', url);
+    
+    const r = await fetch(url);
+    const d = await r.json();
+    console.log('✅ Login:', d);
   } catch(e) {
-    console.error('❌ ÉCHEC Login:', e.message);
+    console.error('❌ Login:', e.message);
   }
 })();
 
@@ -73,7 +72,7 @@ const AppState = {
   isAuthor() { return this.user?.role === 'auteur' || this.user?.role === 'admin'; }
 };
 
-// ===== API =====
+// ===== API - TOUT EN GET POUR CONTOURNER CORS =====
 const API = {
   async get(action, params = {}) {
     try {
@@ -83,9 +82,12 @@ const API = {
         if (v !== null && v !== undefined) url.searchParams.set(k, v.toString());
       });
       
+      console.log('GET:', action);
       const res = await fetch(url.toString());
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return await res.json();
+      const data = await res.json();
+      console.log('Response:', data);
+      return data;
     } catch(e) {
       console.error('API GET error:', e);
       return { success: false, message: 'Erreur connexion' };
@@ -94,14 +96,17 @@ const API = {
 
   async post(data) {
     try {
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
+      // Encoder les données dans l'URL pour éviter CORS
+      const url = new URL(API_URL);
+      url.searchParams.set('action', data.action);
+      url.searchParams.set('_data', encodeURIComponent(JSON.stringify(data)));
       
+      console.log('POST via GET:', data.action, url.toString().substring(0, 200) + '...');
+      const res = await fetch(url.toString());
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return await res.json();
+      const result = await res.json();
+      console.log('Response:', result);
+      return result;
     } catch(e) {
       console.error('API POST error:', e);
       return { success: false, message: 'Erreur connexion' };
