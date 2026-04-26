@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Connexion — Gabon Stories</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+    .auth-card { max-width: 480px; width: 100%; }
+    .auth-top-banner { height: 6px; background: linear-gradient(90deg, var(--vert-gabon), var(--jaune-gabon), var(--bleu-gabon)); }
+    .auth-logo { text-align: center; padding: 2rem 2rem 0; }
+    .auth-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: var(--texte-sombre); text-align: center; margin-bottom: 0.25rem; }
+    .auth-subtitle { text-align: center; color: var(--texte-moyen); font-size: 0.95rem; margin-bottom: 1.5rem; }
+  </style>
+</head>
+<body>
+
+<div class="flag-background">
+  <div class="flag-band flag-band-vert"></div>
+  <div class="flag-band flag-band-jaune"></div>
+  <div class="flag-band flag-band-bleu"></div>
+</div>
+<div class="flag-overlay"></div>
+
+<div class="shapes-container">
+  <div class="shape shape-1"></div>
+  <div class="shape shape-2"></div>
+  <div class="shape shape-3"></div>
+  <div class="shape shape-4"></div>
+  <div class="shape shape-5"></div>
+  <div class="shape shape-6"></div>
+  <div class="shape shape-7"></div>
+  <div class="shape shape-8"></div>
+</div>
+
+<div class="page-content auth-page">
+  <div class="auth-card">
+    <div class="card">
+      <div class="auth-top-banner"></div>
+      <div class="auth-logo">
+        <div class="brand-flag" style="justify-content:center;display:flex;flex-direction:column;width:40px;height:27px;margin:0 auto 1rem;">
+          <span class="bf-vert" style="flex:1;background:var(--vert-gabon);"></span>
+          <span class="bf-jaune" style="flex:1;background:var(--jaune-gabon);"></span>
+          <span class="bf-bleu" style="flex:1;background:var(--bleu-gabon);"></span>
+        </div>
+        <h1 class="auth-title">Connexion</h1>
+        <p class="auth-subtitle">Accédez à votre espace Gabon Stories</p>
+      </div>
+
+      <div class="card-body">
+        <div id="alertContainer"></div>
+
+        <div class="form-group">
+          <label class="form-label">Adresse email</label>
+          <input type="email" class="form-control" id="email" placeholder="votre@email.com" autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Mot de passe</label>
+          <input type="password" class="form-control" id="password" placeholder="••••••••" autocomplete="current-password">
+        </div>
+
+        <button class="btn btn-primary" style="width:100%;" id="loginBtn" onclick="handleLogin()">
+          Se connecter
+        </button>
+
+        <hr class="divider">
+
+        <p style="text-align:center; font-size:0.9rem; color:var(--texte-moyen);">
+          Pas encore de compte ? <a href="inscription.html" style="color:var(--vert-gabon);font-weight:700;">S'inscrire</a>
+        </p>
+        <p style="text-align:center; margin-top:0.5rem;">
+          <a href="index.html" style="font-size:0.85rem;color:#aaa;">← Retour à l'accueil</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+  // Rediriger si déjà connecté
+  AppState.init();
+  if (AppState.isLoggedIn()) {
+    window.location.href = AppState.isAdmin() ? 'admin.html' : 'auteur.html';
+  }
+
+  async function handleLogin() {
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    if (!email || !password) {
+      showAlert('Veuillez remplir tous les champs.', 'error');
+      return;
+    }
+
+    setLoading('loginBtn', true, 'Connexion...');
+
+    try {
+      const res = await API.post({ action: 'login', email, password });
+      if (res.success) {
+        AppState.login(res.user, res.token);
+        showAlert('Connexion réussie ! Redirection...', 'success');
+        setTimeout(() => {
+          window.location.href = res.user.role === 'admin' ? 'admin.html' : 'auteur.html';
+        }, 1000);
+      } else {
+        showAlert(res.message || 'Identifiants incorrects.', 'error');
+        setLoading('loginBtn', false);
+      }
+    } catch(e) {
+      showAlert('Erreur de connexion. Vérifiez votre connexion internet.', 'error');
+      setLoading('loginBtn', false);
+    }
+  }
+
+  // Connexion avec Entrée
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleLogin();
+  });
+</script>
+</body>
+</html>

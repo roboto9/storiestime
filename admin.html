@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administration — Gabon Stories</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="flag-background">
+  <div class="flag-band flag-band-vert"></div>
+  <div class="flag-band flag-band-jaune"></div>
+  <div class="flag-band flag-band-bleu"></div>
+</div>
+<div class="flag-overlay"></div>
+
+<div class="shapes-container">
+  <div class="shape shape-1"></div>
+  <div class="shape shape-3"></div>
+  <div class="shape shape-5"></div>
+  <div class="shape shape-7"></div>
+</div>
+
+<div class="page-content">
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <div class="brand-flag">
+        <span class="bf-vert"></span>
+        <span class="bf-jaune"></span>
+        <span class="bf-bleu"></span>
+      </div>
+      <span class="brand-text">GABON <span>STORIES</span></span>
+    </a>
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <span style="font-size:0.85rem;background:rgba(0,49,137,0.1);color:var(--bleu-gabon);padding:4px 12px;border-radius:20px;font-weight:700;">🔐 Administration</span>
+      <div class="navbar-actions" id="navActions"></div>
+    </div>
+  </nav>
+
+  <div class="dashboard-layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div style="padding:1.5rem;border-bottom:1px solid rgba(0,158,96,0.1);">
+        <div class="avatar" style="width:50px;height:50px;background:linear-gradient(135deg,var(--bleu-gabon),#001a5e);font-size:1.1rem;margin-bottom:0.75rem;">AD</div>
+        <div style="font-weight:700;">Administrateur</div>
+        <div style="font-size:0.8rem;color:var(--bleu-gabon);">🔐 Accès total</div>
+      </div>
+      <p class="sidebar-section-title">Gestion</p>
+      <button class="sidebar-item active" onclick="showAdminSection('dashboard')">
+        <span class="sidebar-item-icon">📊</span> Tableau de bord
+      </button>
+      <button class="sidebar-item" onclick="showAdminSection('users')">
+        <span class="sidebar-item-icon">👥</span> Utilisateurs
+      </button>
+      <button class="sidebar-item" onclick="showAdminSection('stories')">
+        <span class="sidebar-item-icon">📚</span> Histoires
+      </button>
+      <p class="sidebar-section-title">Système</p>
+      <button class="sidebar-item" onclick="window.open('histoires.html')">
+        <span class="sidebar-item-icon">🌐</span> Voir le site
+      </button>
+      <button class="sidebar-item" onclick="handleLogout()">
+        <span class="sidebar-item-icon">🚪</span> Déconnexion
+      </button>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main-content">
+      <div id="alertContainer"></div>
+
+      <!-- DASHBOARD -->
+      <div id="adminDashboard">
+        <h2 class="section-title">📊 Tableau de bord</h2>
+        <p class="section-subtitle">Vue d'ensemble de la plateforme</p>
+        <br>
+        <div class="stats-grid" id="adminStats">
+          <div class="stat-card"><div class="stat-number" id="sTotalUsers">—</div><div class="stat-label">Utilisateurs</div></div>
+          <div class="stat-card"><div class="stat-number" id="sTotalStories">—</div><div class="stat-label">Histoires totales</div></div>
+          <div class="stat-card"><div class="stat-number" id="sPublished">—</div><div class="stat-label">Publiées</div></div>
+          <div class="stat-card"><div class="stat-number" id="sDrafts">—</div><div class="stat-label">Brouillons</div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h3 style="font-family:'Playfair Display',serif;">🇬🇦 À propos de cette plateforme</h3>
+          </div>
+          <div class="card-body">
+            <p style="line-height:1.8;color:var(--texte-moyen);">
+              Bienvenue dans l'interface d'administration de <strong>Gabon Stories</strong>. 
+              Depuis ce tableau de bord, vous gérez l'ensemble de la plateforme : 
+              utilisateurs, histoires, et statistiques. 
+              Toutes les données sont stockées dans <strong>Google Sheets</strong> via <strong>Google Apps Script</strong>.
+            </p>
+            <br>
+            <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+              <button class="btn btn-primary" onclick="showAdminSection('users')">👥 Gérer les utilisateurs</button>
+              <button class="btn btn-secondary" onclick="showAdminSection('stories')">📚 Gérer les histoires</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- UTILISATEURS -->
+      <div id="adminUsers" style="display:none;">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">👥 Gestion des utilisateurs</h2>
+            <p class="section-subtitle">Tous les comptes inscrits sur la plateforme</p>
+          </div>
+          <button class="btn btn-primary" onclick="loadUsers()">🔄 Actualiser</button>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Auteur</th>
+                <th>Email</th>
+                <th>Rôle</th>
+                <th>Inscription</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="usersTableBody">
+              <tr><td colspan="6" style="text-align:center;padding:2rem;color:#aaa;">Chargement...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- HISTOIRES -->
+      <div id="adminStories" style="display:none;">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">📚 Gestion des histoires</h2>
+            <p class="section-subtitle">Toutes les histoires de la plateforme</p>
+          </div>
+          <button class="btn btn-primary" onclick="loadAdminStories()">🔄 Actualiser</button>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Titre</th>
+                <th>Auteur</th>
+                <th>Date</th>
+                <th>Statut</th>
+                <th>Vues</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="storiesTableBody">
+              <tr><td colspan="6" style="text-align:center;padding:2rem;color:#aaa;">Chargement...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMATION -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title" id="confirmModalTitle">Confirmer l'action</h3>
+      <button class="modal-close" onclick="closeModal('confirmModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p id="confirmModalText" style="color:var(--texte-moyen);margin-bottom:1.5rem;"></p>
+      <div style="display:flex;gap:1rem;">
+        <button class="btn btn-danger" id="confirmModalBtn">Confirmer</button>
+        <button class="btn btn-secondary" onclick="closeModal('confirmModal')">Annuler</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+  AppState.init();
+  if (!AppState.isLoggedIn() || !AppState.isAdmin()) window.location.href = 'connexion.html';
+
+  function showAdminSection(name) {
+    ['adminDashboard','adminUsers','adminStories'].forEach(id => {
+      document.getElementById(id).style.display = 'none';
+    });
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+
+    if (name === 'dashboard') {
+      document.getElementById('adminDashboard').style.display = 'block';
+      loadDashboardStats();
+    } else if (name === 'users') {
+      document.getElementById('adminUsers').style.display = 'block';
+      loadUsers();
+    } else if (name === 'stories') {
+      document.getElementById('adminStories').style.display = 'block';
+      loadAdminStories();
+    }
+  }
+
+  async function loadDashboardStats() {
+    try {
+      const [usersRes, storiesRes] = await Promise.all([
+        API.post({ action: 'adminGetUsers', sessionToken: AppState.token }),
+        API.post({ action: 'adminGetAllStories', sessionToken: AppState.token })
+      ]);
+      if (usersRes.success) document.getElementById('sTotalUsers').textContent = usersRes.users.length;
+      if (storiesRes.success) {
+        const s = storiesRes.stories;
+        document.getElementById('sTotalStories').textContent = s.length;
+        document.getElementById('sPublished').textContent = s.filter(x => x.status === 'publié').length;
+        document.getElementById('sDrafts').textContent = s.filter(x => x.status === 'brouillon').length;
+      }
+    } catch(e) {}
+  }
+
+  async function loadUsers() {
+    const tbody = document.getElementById('usersTableBody');
+    try {
+      const res = await API.post({ action: 'adminGetUsers', sessionToken: AppState.token });
+      if (res.success && res.users.length > 0) {
+        tbody.innerHTML = res.users.map(u => `
+          <tr>
+            <td><strong>${escapeHtml(u.username)}</strong></td>
+            <td>${escapeHtml(u.email)}</td>
+            <td><span class="story-badge ${u.role === 'admin' ? 'badge-pending' : 'badge-published'}">${u.role}</span></td>
+            <td>${formatDate(u.createdAt)}</td>
+            <td><span class="story-badge ${u.status === 'active' ? 'badge-published' : 'badge-draft'}">${u.status}</span></td>
+            <td style="display:flex;gap:0.5rem;">
+              ${u.role !== 'admin' ? `
+                <button class="btn btn-sm ${u.status === 'blocked' ? 'btn-primary' : 'btn-secondary'}" onclick="toggleBlock('${u.id}', '${u.username}', '${u.status}')">
+                  ${u.status === 'blocked' ? '✅ Débloquer' : '🚫 Bloquer'}
+                </button>
+                <button class="btn btn-danger btn-sm" onclick="deleteUser('${u.id}', '${u.username}')">🗑️</button>
+              ` : '<span style="color:#aaa;font-size:0.85rem;">—</span>'}
+            </td>
+          </tr>
+        `).join('');
+      } else {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:#aaa;">Aucun utilisateur.</td></tr>`;
+      }
+    } catch(e) {
+      tbody.innerHTML = `<tr><td colspan="6" style="color:red;padding:1rem;">Erreur de chargement.</td></tr>`;
+    }
+  }
+
+  async function loadAdminStories() {
+    const tbody = document.getElementById('storiesTableBody');
+    try {
+      const res = await API.post({ action: 'adminGetAllStories', sessionToken: AppState.token });
+      if (res.success && res.stories.length > 0) {
+        tbody.innerHTML = res.stories.map(s => `
+          <tr>
+            <td><strong>${escapeHtml(s.title)}</strong></td>
+            <td>${escapeHtml(s.authorName)}</td>
+            <td>${formatDate(s.createdAt)}</td>
+            <td><span class="story-badge badge-${s.status === 'publié' ? 'published' : s.status === 'brouillon' ? 'draft' : 'pending'}">${s.status}</span></td>
+            <td>👁 ${s.views}</td>
+            <td style="display:flex;gap:0.5rem;">
+              ${s.status === 'publié' ? `<a href="lire.html?id=${s.id}" target="_blank" class="btn btn-sm" style="background:rgba(0,158,96,0.1);color:var(--vert-gabon);">👁 Voir</a>` : ''}
+              ${s.status !== 'publié' ? `<button class="btn btn-primary btn-sm" onclick="validateStory('${s.id}')">✅ Valider</button>` : ''}
+              <button class="btn btn-danger btn-sm" onclick="adminDelStory('${s.id}', '${escapeHtml(s.title)}')">🗑️</button>
+            </td>
+          </tr>
+        `).join('');
+      } else {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:2rem;color:#aaa;">Aucune histoire.</td></tr>`;
+      }
+    } catch(e) {
+      tbody.innerHTML = `<tr><td colspan="6" style="color:red;padding:1rem;">Erreur.</td></tr>`;
+    }
+  }
+
+  function openConfirmModal(title, text, onConfirm) {
+    document.getElementById('confirmModalTitle').textContent = title;
+    document.getElementById('confirmModalText').textContent = text;
+    document.getElementById('confirmModalBtn').onclick = () => { closeModal('confirmModal'); onConfirm(); };
+    openModal('confirmModal');
+  }
+
+  function toggleBlock(id, name, status) {
+    const action = status === 'blocked' ? 'débloquer' : 'bloquer';
+    openConfirmModal(`${action.charAt(0).toUpperCase() + action.slice(1)} l'utilisateur`,
+      `Voulez-vous ${action} "${name}" ?`, async () => {
+        const res = await API.post({ action: 'adminBlockUser', sessionToken: AppState.token, userId: id });
+        if (res.success) { showAlert(`✅ Utilisateur ${res.newStatus === 'blocked' ? 'bloqué' : 'débloqué'}.`, 'success'); loadUsers(); }
+        else showAlert(res.message, 'error');
+      }
+    );
+  }
+
+  function deleteUser(id, name) {
+    openConfirmModal('Supprimer l\'utilisateur', `Supprimer définitivement "${name}" et toutes ses données ?`, async () => {
+      const res = await API.post({ action: 'adminDeleteUser', sessionToken: AppState.token, userId: id });
+      if (res.success) { showAlert('✅ Utilisateur supprimé.', 'success'); loadUsers(); }
+      else showAlert(res.message, 'error');
+    });
+  }
+
+  function adminDelStory(id, title) {
+    openConfirmModal('Supprimer l\'histoire', `Supprimer définitivement "${title}" ?`, async () => {
+      const res = await API.post({ action: 'deleteStory', sessionToken: AppState.token, id });
+      if (res.success) { showAlert('✅ Histoire supprimée.', 'success'); loadAdminStories(); }
+      else showAlert(res.message, 'error');
+    });
+  }
+
+  async function validateStory(id) {
+    const res = await API.post({ action: 'adminValidateStory', sessionToken: AppState.token, id });
+    if (res.success) { showAlert('✅ Histoire validée et publiée !', 'success'); loadAdminStories(); }
+    else showAlert(res.message, 'error');
+  }
+
+  document.addEventListener('DOMContentLoaded', () => loadDashboardStats());
+</script>
+</body>
+</html>

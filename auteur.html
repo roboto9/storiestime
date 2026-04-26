@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Espace Auteur — Gabon Stories</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .story-editor { background: rgba(255,255,255,0.95); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-soft); }
+    .editor-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    #storyContent { min-height: 300px; font-size: 1.05rem; line-height: 1.8; }
+  </style>
+</head>
+<body>
+
+<div class="flag-background">
+  <div class="flag-band flag-band-vert"></div>
+  <div class="flag-band flag-band-jaune"></div>
+  <div class="flag-band flag-band-bleu"></div>
+</div>
+<div class="flag-overlay"></div>
+
+<div class="shapes-container">
+  <div class="shape shape-1"></div>
+  <div class="shape shape-3"></div>
+  <div class="shape shape-5"></div>
+  <div class="shape shape-7"></div>
+</div>
+
+<div class="page-content">
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <div class="brand-flag">
+        <span class="bf-vert"></span>
+        <span class="bf-jaune"></span>
+        <span class="bf-bleu"></span>
+      </div>
+      <span class="brand-text">GABON <span>STORIES</span></span>
+    </a>
+    <ul class="navbar-nav">
+      <li><a href="histoires.html">📚 Bibliothèque</a></li>
+    </ul>
+    <div class="navbar-actions" id="navActions"></div>
+  </nav>
+
+  <div class="dashboard-layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div style="padding: 1.5rem; border-bottom: 1px solid rgba(0,158,96,0.1);">
+        <div class="avatar" style="width:50px;height:50px;font-size:1.1rem;margin-bottom:0.75rem;" id="sidebarAvatar">--</div>
+        <div style="font-weight:700;" id="sidebarName">Chargement...</div>
+        <div style="font-size:0.8rem;color:var(--vert-gabon);">✍️ Auteur</div>
+      </div>
+      <p class="sidebar-section-title">Mon espace</p>
+      <button class="sidebar-item active" id="tabMesHistoires" onclick="showSection('mesHistoires')">
+        <span class="sidebar-item-icon">📖</span> Mes histoires
+      </button>
+      <button class="sidebar-item" id="tabNouvelleHistoire" onclick="showSection('nouvelleHistoire')">
+        <span class="sidebar-item-icon">✏️</span> Nouvelle histoire
+      </button>
+      <p class="sidebar-section-title">Compte</p>
+      <button class="sidebar-item" onclick="handleLogout()">
+        <span class="sidebar-item-icon">🚪</span> Se déconnecter
+      </button>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main-content">
+      <div id="alertContainer"></div>
+
+      <!-- MES HISTOIRES -->
+      <div id="sectionMesHistoires">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">📖 Mes histoires</h2>
+            <p class="section-subtitle">Gérez vos créations littéraires</p>
+          </div>
+          <button class="btn btn-primary" onclick="showSection('nouvelleHistoire')">+ Nouvelle histoire</button>
+        </div>
+        <div id="myStoriesGrid" class="grid-3">
+          <div class="empty-state" style="grid-column:1/-1">
+            <div class="empty-state-icon">⏳</div>
+            <h3>Chargement...</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- NOUVELLE / MODIFIER HISTOIRE -->
+      <div id="sectionNouvelleHistoire" style="display:none;">
+        <h2 class="section-title" id="editorTitle">✏️ Nouvelle histoire</h2>
+        <p class="section-subtitle" id="editorSubtitle">Donnez vie à votre récit</p>
+        <br>
+        <div class="story-editor">
+          <input type="hidden" id="editingId">
+          <div class="form-group">
+            <label class="form-label">Titre de l'histoire *</label>
+            <input type="text" class="form-control" id="storyTitle" placeholder="Un titre accrocheur...">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Votre histoire *</label>
+            <textarea class="form-control" id="storyContent" style="min-height:350px;" placeholder="Il était une fois, au cœur du Gabon..."></textarea>
+          </div>
+          <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+            <button class="btn btn-secondary" id="saveDraftBtn" onclick="saveStory('brouillon')">💾 Sauvegarder en brouillon</button>
+            <button class="btn btn-primary" id="publishBtn" onclick="saveStory('publié')">🌍 Publier maintenant</button>
+            <button class="btn" style="background:#f0f0f0;color:#666;" onclick="showSection('mesHistoires')">Annuler</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMATION SUPPRESSION -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 class="modal-title">⚠️ Confirmer la suppression</h3>
+      <button class="modal-close" onclick="closeModal('deleteModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--texte-moyen);margin-bottom:1.5rem;">
+        Êtes-vous sûr de vouloir supprimer cette histoire ? Cette action est irréversible.
+      </p>
+      <div style="display:flex;gap:1rem;">
+        <button class="btn btn-danger" id="confirmDeleteBtn">Oui, supprimer</button>
+        <button class="btn btn-secondary" onclick="closeModal('deleteModal')">Annuler</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+  AppState.init();
+  if (!AppState.isLoggedIn()) window.location.href = 'connexion.html';
+
+  // Init sidebar
+  document.getElementById('sidebarName').textContent = AppState.user?.username || 'Auteur';
+  document.getElementById('sidebarAvatar').textContent = getInitials(AppState.user?.username || 'AU');
+
+  function showSection(name) {
+    document.getElementById('sectionMesHistoires').style.display = name === 'mesHistoires' ? 'block' : 'none';
+    document.getElementById('sectionNouvelleHistoire').style.display = name === 'nouvelleHistoire' ? 'block' : 'none';
+    document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+    if (name === 'mesHistoires') {
+      document.getElementById('tabMesHistoires').classList.add('active');
+      loadMyStories();
+    } else if (name === 'nouvelleHistoire') {
+      document.getElementById('tabNouvelleHistoire').classList.add('active');
+      document.getElementById('editingId').value = '';
+      document.getElementById('storyTitle').value = '';
+      document.getElementById('storyContent').value = '';
+      document.getElementById('editorTitle').textContent = '✏️ Nouvelle histoire';
+      document.getElementById('editorSubtitle').textContent = 'Donnez vie à votre récit';
+    }
+  }
+
+  async function loadMyStories() {
+    const grid = document.getElementById('myStoriesGrid');
+    try {
+      const res = await API.post({ action: 'getMyStories', sessionToken: AppState.token });
+      if (res.success && res.stories.length > 0) {
+        grid.innerHTML = res.stories.map(story => `
+          <div class="story-card">
+            <div class="story-card-banner"></div>
+            <div class="story-card-body">
+              <h3 class="story-card-title">${escapeHtml(story.title)}</h3>
+              <div style="margin-bottom:0.5rem;"><span class="story-badge badge-${story.status === 'publié' ? 'published' : story.status === 'brouillon' ? 'draft' : 'pending'}">${story.status}</span></div>
+              <p class="story-card-excerpt">${escapeHtml(story.excerpt)}</p>
+            </div>
+            <div class="story-card-footer">
+              <span>📅 ${formatDate(story.createdAt)}</span>
+              <span>👁 ${story.views}</span>
+            </div>
+            <div style="padding:0.75rem 1.5rem;display:flex;gap:0.5rem;flex-wrap:wrap;border-top:1px solid rgba(0,158,96,0.1);">
+              <button class="btn btn-secondary btn-sm" onclick="editStory('${story.id}', ${JSON.stringify(story).replace(/'/g, "\\'")})">✏️ Modifier</button>
+              ${story.status !== 'publié' ? `<button class="btn btn-primary btn-sm" onclick="quickPublish('${story.id}')">🌍 Publier</button>` : `<a href="lire.html?id=${story.id}" class="btn btn-sm" style="background:rgba(0,158,96,0.1);color:var(--vert-gabon);" target="_blank">👁 Voir</a>`}
+              <button class="btn btn-danger btn-sm" onclick="confirmDelete('${story.id}')">🗑️</button>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        grid.innerHTML = `
+          <div class="empty-state" style="grid-column:1/-1">
+            <div class="empty-state-icon">📝</div>
+            <h3>Vous n'avez pas encore d'histoires</h3>
+            <p>Commencez à écrire votre première histoire !</p>
+            <br><button class="btn btn-primary" onclick="showSection('nouvelleHistoire')">✏️ Écrire maintenant</button>
+          </div>
+        `;
+      }
+    } catch(e) {
+      grid.innerHTML = `<div class="alert alert-error" style="grid-column:1/-1">⚠️ Erreur de chargement.</div>`;
+    }
+  }
+
+  async function saveStory(status) {
+    const id = document.getElementById('editingId').value;
+    const title = document.getElementById('storyTitle').value.trim();
+    const content = document.getElementById('storyContent').value.trim();
+
+    if (!title || !content) { showAlert('Titre et contenu sont requis.', 'error'); return; }
+
+    const btnId = status === 'publié' ? 'publishBtn' : 'saveDraftBtn';
+    setLoading(btnId, true, status === 'publié' ? 'Publication...' : 'Sauvegarde...');
+
+    try {
+      let res;
+      if (id) {
+        res = await API.post({ action: 'updateStory', sessionToken: AppState.token, id, title, content, status });
+      } else {
+        res = await API.post({ action: 'createStory', sessionToken: AppState.token, title, content, status });
+      }
+
+      if (res.success) {
+        showAlert('✅ ' + res.message, 'success');
+        setTimeout(() => showSection('mesHistoires'), 1500);
+      } else {
+        showAlert(res.message || 'Erreur.', 'error');
+      }
+    } catch(e) {
+      showAlert('Erreur de connexion.', 'error');
+    }
+    setLoading(btnId, false);
+  }
+
+  function editStory(id, story) {
+    document.getElementById('editingId').value = id;
+    document.getElementById('storyTitle').value = story.title || '';
+    // Récupérer le contenu complet via API
+    loadFullStory(id);
+    document.getElementById('editorTitle').textContent = '✏️ Modifier l\'histoire';
+    document.getElementById('editorSubtitle').textContent = escapeHtml(story.title);
+    showSection('nouvelleHistoire');
+  }
+
+  async function loadFullStory(id) {
+    const res = await API.get('getStory', { id });
+    if (res.success) document.getElementById('storyContent').value = res.story.content;
+  }
+
+  async function quickPublish(id) {
+    try {
+      const res = await API.post({ action: 'publishStory', sessionToken: AppState.token, id });
+      if (res.success) { showAlert('✅ Histoire publiée !', 'success'); loadMyStories(); }
+      else showAlert(res.message, 'error');
+    } catch(e) { showAlert('Erreur.', 'error'); }
+  }
+
+  let deleteTargetId = null;
+  function confirmDelete(id) {
+    deleteTargetId = id;
+    openModal('deleteModal');
+    document.getElementById('confirmDeleteBtn').onclick = async () => {
+      closeModal('deleteModal');
+      try {
+        const res = await API.post({ action: 'deleteStory', sessionToken: AppState.token, id: deleteTargetId });
+        if (res.success) { showAlert('Histoire supprimée.', 'success'); loadMyStories(); }
+        else showAlert(res.message, 'error');
+      } catch(e) { showAlert('Erreur.', 'error'); }
+    };
+  }
+
+  document.addEventListener('DOMContentLoaded', () => loadMyStories());
+</script>
+</body>
+</html>

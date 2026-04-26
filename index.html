@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gabon Stories — Bibliothèque Collaborative</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- FOND DRAPEAU GABONAIS -->
+<div class="flag-background">
+  <div class="flag-band flag-band-vert"></div>
+  <div class="flag-band flag-band-jaune"></div>
+  <div class="flag-band flag-band-bleu"></div>
+</div>
+<div class="flag-overlay"></div>
+
+<!-- FORMES ANIMÉES -->
+<div class="shapes-container">
+  <div class="shape shape-1"></div>
+  <div class="shape shape-2"></div>
+  <div class="shape shape-3"></div>
+  <div class="shape shape-4"></div>
+  <div class="shape shape-5"></div>
+  <div class="shape shape-6"></div>
+  <div class="shape shape-7"></div>
+  <div class="shape shape-8"></div>
+  <div class="shape shape-tri shape-tri-1"></div>
+  <div class="shape shape-tri shape-tri-2"></div>
+</div>
+
+<!-- CONTENU -->
+<div class="page-content">
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <div class="brand-flag">
+        <span class="bf-vert"></span>
+        <span class="bf-jaune"></span>
+        <span class="bf-bleu"></span>
+      </div>
+      <span class="brand-text">GABON <span>STORIES</span></span>
+    </a>
+    <ul class="navbar-nav">
+      <li><a href="index.html">Accueil</a></li>
+      <li><a href="histoires.html">Histoires</a></li>
+      <li><a href="inscription.html">Devenir Auteur</a></li>
+    </ul>
+    <div class="navbar-actions" id="navActions"></div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="flag-stripe">
+        <span class="fs-vert"></span>
+        <span class="fs-jaune"></span>
+        <span class="fs-bleu"></span>
+      </div>
+      <p class="hero-eyebrow">🇬🇦 Plateforme Gabonaise d'Écriture Collaborative</p>
+      <h1 class="hero-title">Les voix du <em>Gabon</em> s'écrivent ici</h1>
+      <p class="hero-subtitle">
+        Découvrez des histoires authentiques, des récits vibrants et des univers imaginaires créés par des auteurs gabonais. Partagez votre propre plume avec le monde.
+      </p>
+      <div class="hero-actions">
+        <a href="histoires.html" class="btn btn-primary btn-lg">📚 Lire les histoires</a>
+        <a href="inscription.html" class="btn btn-secondary btn-lg">✍️ Écrire une histoire</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATISTIQUES -->
+  <section class="section-sm" style="background: rgba(255,255,255,0.4);">
+    <div class="container">
+      <div class="stats-grid" id="statsGrid">
+        <div class="stat-card">
+          <div class="stat-number" id="statStories">—</div>
+          <div class="stat-label">Histoires publiées</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="statAuthors">—</div>
+          <div class="stat-label">Auteurs actifs</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="statViews">—</div>
+          <div class="stat-label">Lectures totales</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">🇬🇦</div>
+          <div class="stat-label">Made in Gabon</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HISTOIRES RÉCENTES -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Histoires récentes</h2>
+          <p class="section-subtitle">Les dernières créations de nos auteurs</p>
+        </div>
+        <a href="histoires.html" class="btn btn-secondary">Voir tout →</a>
+      </div>
+
+      <div id="storiesGrid" class="grid-3">
+        <div class="empty-state" style="grid-column: 1/-1;">
+          <div class="empty-state-icon">📖</div>
+          <h3>Chargement des histoires...</h3>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CALL TO ACTION -->
+  <section class="section" style="background: linear-gradient(135deg, rgba(0,158,96,0.08), rgba(0,49,137,0.08));">
+    <div class="container" style="text-align: center; max-width: 650px;">
+      <div class="flag-stripe" style="justify-content: center; margin-bottom: 1.5rem;">
+        <span class="fs-vert"></span>
+        <span class="fs-jaune"></span>
+        <span class="fs-bleu"></span>
+      </div>
+      <h2 class="section-title">Prêt à partager votre histoire ?</h2>
+      <p style="color: var(--texte-moyen); font-size: 1.1rem; margin-bottom: 2rem; line-height: 1.7;">
+        Rejoignez la communauté des auteurs gabonais. Créez un compte gratuit et commencez à écrire dès aujourd'hui.
+      </p>
+      <a href="inscription.html" class="btn btn-primary btn-lg">Créer mon compte auteur</a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-flag">
+      <span style="background:var(--vert-gabon)"></span>
+      <span style="background:var(--jaune-gabon)"></span>
+      <span style="background:var(--bleu-gabon)"></span>
+    </div>
+    <p>🇬🇦 <strong>Gabon Stories</strong> — Plateforme collaborative d'écriture gabonaise</p>
+    <p style="margin-top: 0.5rem; font-size: 0.8rem; opacity: 0.6;">
+      <a href="connexion.html">Connexion</a> · <a href="inscription.html">Inscription</a>
+    </p>
+  </footer>
+</div>
+
+<script src="app.js"></script>
+<script>
+  // Charger stats et histoires
+  async function loadHomepage() {
+    // Stats
+    try {
+      const res = await API.get('getStats');
+      if (res.success) {
+        document.getElementById('statStories').textContent = res.stats.stories;
+        document.getElementById('statAuthors').textContent = res.stats.authors;
+        document.getElementById('statViews').textContent = res.stats.views;
+      }
+    } catch(e) {}
+
+    // Histoires
+    try {
+      const res = await API.get('getStories');
+      const grid = document.getElementById('storiesGrid');
+      if (res.success && res.stories.length > 0) {
+        const recent = res.stories.slice(0, 6);
+        grid.innerHTML = recent.map(story => `
+          <div class="story-card" onclick="window.location.href='lire.html?id=${story.id}'">
+            <div class="story-card-banner"></div>
+            <div class="story-card-body">
+              <h3 class="story-card-title">${escapeHtml(story.title)}</h3>
+              <p class="story-card-author">✍️ ${escapeHtml(story.authorName)}</p>
+              <p class="story-card-excerpt">${escapeHtml(story.excerpt)}</p>
+            </div>
+            <div class="story-card-footer">
+              <span>📅 ${formatDate(story.createdAt)}</span>
+              <span>👁 ${story.views}</span>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        grid.innerHTML = `
+          <div class="empty-state" style="grid-column:1/-1">
+            <div class="empty-state-icon">📭</div>
+            <h3>Aucune histoire publiée pour l'instant</h3>
+            <p>Soyez le premier à partager votre récit !</p>
+            <br><a href="inscription.html" class="btn btn-primary">Écrire une histoire</a>
+          </div>
+        `;
+      }
+    } catch(e) {
+      document.getElementById('storiesGrid').innerHTML = `
+        <div class="alert alert-error" style="grid-column:1/-1">
+          ⚠️ Impossible de charger les histoires. Vérifiez la configuration de l'API.
+        </div>
+      `;
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', loadHomepage);
+</script>
+</body>
+</html>

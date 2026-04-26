@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inscription — Gabon Stories</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .auth-page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+    .auth-card { max-width: 500px; width: 100%; }
+    .auth-top-banner { height: 6px; background: linear-gradient(90deg, var(--vert-gabon), var(--jaune-gabon), var(--bleu-gabon)); }
+    .auth-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; text-align: center; }
+    .auth-subtitle { text-align: center; color: var(--texte-moyen); margin-bottom: 1.5rem; }
+    .perks { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.5rem; }
+    .perk { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; color: var(--texte-moyen); }
+  </style>
+</head>
+<body>
+
+<div class="flag-background">
+  <div class="flag-band flag-band-vert"></div>
+  <div class="flag-band flag-band-jaune"></div>
+  <div class="flag-band flag-band-bleu"></div>
+</div>
+<div class="flag-overlay"></div>
+
+<div class="shapes-container">
+  <div class="shape shape-1"></div>
+  <div class="shape shape-2"></div>
+  <div class="shape shape-3"></div>
+  <div class="shape shape-4"></div>
+  <div class="shape shape-5"></div>
+  <div class="shape shape-6"></div>
+  <div class="shape shape-7"></div>
+  <div class="shape shape-8"></div>
+</div>
+
+<div class="page-content auth-page">
+  <div class="auth-card">
+    <div class="card">
+      <div class="auth-top-banner"></div>
+      <div class="card-body">
+        <div style="text-align:center;margin-bottom:1.5rem;">
+          <p style="font-size:2rem;margin-bottom:0.5rem;">✍️</p>
+          <h1 class="auth-title">Devenir Auteur</h1>
+          <p class="auth-subtitle">Rejoignez la communauté des écrivains gabonais</p>
+        </div>
+
+        <div class="perks">
+          <div class="perk">✅ Publier vos histoires</div>
+          <div class="perk">✅ Compte gratuit</div>
+          <div class="perk">✅ Communauté de lecteurs</div>
+          <div class="perk">✅ Tableau de bord auteur</div>
+        </div>
+
+        <div id="alertContainer"></div>
+
+        <div class="form-group">
+          <label class="form-label">Nom d'auteur</label>
+          <input type="text" class="form-control" id="username" placeholder="Ex: Jean-Paul Obiang" autocomplete="name">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Adresse email</label>
+          <input type="email" class="form-control" id="email" placeholder="votre@email.com" autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Mot de passe <small style="color:#aaa;font-weight:400;">(min. 6 caractères)</small></label>
+          <input type="password" class="form-control" id="password" placeholder="••••••••" autocomplete="new-password">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Confirmer le mot de passe</label>
+          <input type="password" class="form-control" id="confirmPassword" placeholder="••••••••" autocomplete="new-password">
+        </div>
+
+        <button class="btn btn-primary" style="width:100%;" id="registerBtn" onclick="handleRegister()">
+          🇬🇦 Créer mon compte
+        </button>
+
+        <hr class="divider">
+
+        <p style="text-align:center;font-size:0.9rem;color:var(--texte-moyen);">
+          Déjà inscrit ? <a href="connexion.html" style="color:var(--vert-gabon);font-weight:700;">Se connecter</a>
+        </p>
+        <p style="text-align:center;margin-top:0.5rem;">
+          <a href="index.html" style="font-size:0.85rem;color:#aaa;">← Retour à l'accueil</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+  AppState.init();
+  if (AppState.isLoggedIn()) window.location.href = 'auteur.html';
+
+  async function handleRegister() {
+    const username = document.getElementById('username').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirmPassword').value;
+
+    if (!username || !email || !password || !confirm) {
+      showAlert('Veuillez remplir tous les champs.', 'error'); return;
+    }
+    if (password !== confirm) {
+      showAlert('Les mots de passe ne correspondent pas.', 'error'); return;
+    }
+    if (password.length < 6) {
+      showAlert('Le mot de passe doit contenir au moins 6 caractères.', 'error'); return;
+    }
+
+    setLoading('registerBtn', true, 'Création...');
+    try {
+      const res = await API.post({ action: 'register', username, email, password });
+      if (res.success) {
+        showAlert('✅ ' + res.message, 'success');
+        setTimeout(() => window.location.href = 'connexion.html', 2000);
+      } else {
+        showAlert(res.message || 'Erreur lors de l\'inscription.', 'error');
+        setLoading('registerBtn', false);
+      }
+    } catch(e) {
+      showAlert('Erreur de connexion. Vérifiez votre connexion internet.', 'error');
+      setLoading('registerBtn', false);
+    }
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Histoires — Gabon Stories</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="flag-background">
+  <div class="flag-band flag-band-vert"></div>
+  <div class="flag-band flag-band-jaune"></div>
+  <div class="flag-band flag-band-bleu"></div>
+</div>
+<div class="flag-overlay"></div>
+
+<div class="shapes-container">
+  <div class="shape shape-1"></div>
+  <div class="shape shape-2"></div>
+  <div class="shape shape-3"></div>
+  <div class="shape shape-4"></div>
+  <div class="shape shape-5"></div>
+  <div class="shape shape-6"></div>
+  <div class="shape shape-7"></div>
+  <div class="shape shape-8"></div>
+</div>
+
+<div class="page-content">
+  <nav class="navbar">
+    <a href="index.html" class="navbar-brand">
+      <div class="brand-flag">
+        <span class="bf-vert"></span>
+        <span class="bf-jaune"></span>
+        <span class="bf-bleu"></span>
+      </div>
+      <span class="brand-text">GABON <span>STORIES</span></span>
+    </a>
+    <ul class="navbar-nav">
+      <li><a href="index.html">Accueil</a></li>
+      <li><a href="histoires.html">Histoires</a></li>
+      <li><a href="inscription.html">Devenir Auteur</a></li>
+    </ul>
+    <div class="navbar-actions" id="navActions"></div>
+  </nav>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <div>
+          <h1 class="section-title">📚 Bibliothèque</h1>
+          <p class="section-subtitle">Toutes les histoires de nos auteurs</p>
+        </div>
+        <div class="search-bar">
+          <input type="text" class="form-control" id="searchInput" placeholder="Rechercher une histoire...">
+          <button class="btn btn-primary" onclick="doSearch()">🔍</button>
+        </div>
+      </div>
+
+      <div id="alertContainer"></div>
+
+      <div id="storiesGrid" class="grid-3">
+        <div class="empty-state" style="grid-column:1/-1">
+          <div class="empty-state-icon">⏳</div>
+          <h3>Chargement...</h3>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-flag">
+      <span style="background:var(--vert-gabon)"></span>
+      <span style="background:var(--jaune-gabon)"></span>
+      <span style="background:var(--bleu-gabon)"></span>
+    </div>
+    <p>🇬🇦 <strong>Gabon Stories</strong></p>
+  </footer>
+</div>
+
+<script src="js/app.js"></script>
+<script>
+  let allStories = [];
+
+  async function loadStories(search = '') {
+    const grid = document.getElementById('storiesGrid');
+    try {
+      const params = search ? { search } : {};
+      const res = await API.get('getStories', params);
+      allStories = res.stories || [];
+
+      if (res.success && allStories.length > 0) {
+        grid.innerHTML = allStories.map(story => `
+          <div class="story-card" onclick="window.location.href='lire.html?id=${story.id}'">
+            <div class="story-card-banner"></div>
+            <div class="story-card-body">
+              <h3 class="story-card-title">${escapeHtml(story.title)}</h3>
+              <p class="story-card-author">✍️ ${escapeHtml(story.authorName)}</p>
+              <p class="story-card-excerpt">${escapeHtml(story.excerpt)}</p>
+            </div>
+            <div class="story-card-footer">
+              <span>📅 ${formatDate(story.createdAt)}</span>
+              <span>👁 ${story.views}</span>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        grid.innerHTML = `
+          <div class="empty-state" style="grid-column:1/-1">
+            <div class="empty-state-icon">🔍</div>
+            <h3>${search ? 'Aucun résultat pour "' + escapeHtml(search) + '"' : 'Aucune histoire publiée'}</h3>
+            <p>Essayez un autre terme de recherche.</p>
+          </div>
+        `;
+      }
+    } catch(e) {
+      grid.innerHTML = `<div class="alert alert-error" style="grid-column:1/-1">⚠️ Erreur de chargement. Vérifiez l'API.</div>`;
+    }
+  }
+
+  function doSearch() {
+    const search = document.getElementById('searchInput').value.trim();
+    loadStories(search);
+  }
+
+  document.getElementById('searchInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doSearch();
+  });
+
+  document.addEventListener('DOMContentLoaded', () => loadStories());
+</script>
+</body>
+</html>
