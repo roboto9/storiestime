@@ -1,38 +1,8 @@
 // ===================================================
 // GABON STORIES - JAVASCRIPT PRINCIPAL
-// Version anti-CORS corrigée
 // ===================================================
 
 const API_URL = 'https://script.google.com/macros/s/AKfycbyhtcIwite2fwwKjR54E99Ur88kCIosUKSI0oofC7fmoa-c-r8-pep7bIJ_mDJ01KaEBg/exec';
-
-console.log('🚀 Gabon Stories');
-console.log('📡 API URL:', API_URL);
-
-// ===== DIAGNOSTIC =====
-(async function diagnostic() {
-  console.log('🔍 DIAGNOSTIC...');
-  
-  // Test GET simple
-  try {
-    const r = await fetch(API_URL + '?action=getStats');
-    const d = await r.json();
-    console.log('✅ getStats:', d);
-  } catch(e) {
-    console.error('❌ getStats:', e.message);
-  }
-  
-  // Test login direct
-  try {
-    const url = API_URL + '?action=login&email=mayialex370@gmail.com&password=magnifique241';
-    console.log('URL test login:', url);
-    
-    const r = await fetch(url);
-    const d = await r.json();
-    console.log('✅ Login test:', d);
-  } catch(e) {
-    console.error('❌ Login test:', e.message);
-  }
-})();
 
 // ===== GESTION DE L'ÉTAT =====
 const AppState = {
@@ -43,9 +13,7 @@ const AppState = {
     this.token = localStorage.getItem('gs_token');
     const userStr = localStorage.getItem('gs_user');
     if (userStr) {
-      try { this.user = JSON.parse(userStr); } catch(e) {
-        this.logout();
-      }
+      try { this.user = JSON.parse(userStr); } catch(e) { this.logout(); }
     }
   },
 
@@ -68,88 +36,73 @@ const AppState = {
   isAuthor() { return this.user?.role === 'auteur' || this.user?.role === 'admin'; }
 };
 
-// ===== API - TOUT EN GET AVEC PARAMÈTRES SIMPLES =====
+// ===== API (TOUT EN GET) =====
 const API = {
   async get(action, params = {}) {
     try {
       const url = new URL(API_URL);
       url.searchParams.set('action', action);
-      Object.entries(params).forEach(([k, v]) => {
-        if (v !== null && v !== undefined) url.searchParams.set(k, v.toString());
-      });
-      
-      console.log('GET ' + action + ':', url.toString().substring(0, 150) + '...');
+      for (const [k, v] of Object.entries(params)) {
+        if (v !== null && v !== undefined) url.searchParams.set(k, String(v));
+      }
       const res = await fetch(url.toString());
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      console.log('  →', data.success ? '✅' : '❌', data.message || '');
-      return data;
+      return await res.json();
     } catch(e) {
-      console.error('API GET error:', e);
-      return { success: false, message: 'Erreur connexion' };
+      return { success: false, message: 'Erreur réseau' };
     }
   },
 
   async post(data) {
     try {
       const url = new URL(API_URL);
-      
-      // Ajouter l'action et tous les champs comme paramètres
-      Object.entries(data).forEach(([k, v]) => {
+      // Ajouter tous les champs comme paramètres GET
+      for (const [k, v] of Object.entries(data)) {
         if (v !== null && v !== undefined && v !== '') {
-          url.searchParams.set(k, v.toString());
+          url.searchParams.set(k, String(v));
         }
-      });
-      
-      console.log('POST ' + data.action + ': ' + url.toString().substring(0, 150) + '...');
+      }
       const res = await fetch(url.toString());
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const result = await res.json();
-      console.log('  →', result.success ? '✅' : '❌', result.message || '');
-      return result;
+      return await res.json();
     } catch(e) {
-      console.error('API POST error:', e);
-      return { success: false, message: 'Erreur connexion' };
+      return { success: false, message: 'Erreur réseau' };
     }
   }
 };
 
 // ===== UTILITAIRES UI =====
-function showAlert(message, type = 'success', containerId = 'alertContainer') {
+function showAlert(message, type, containerId) {
+  type = type || 'success';
+  containerId = containerId || 'alertContainer';
   const container = document.getElementById(containerId);
-  if (!container) {
-    alert(message);
-    return;
-  }
-  container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
-  setTimeout(() => { container.innerHTML = ''; }, 5000);
+  if (!container) { alert(message); return; }
+  container.innerHTML = '<div class="alert alert-' + type + '">' + message + '</div>';
+  setTimeout(function() { container.innerHTML = ''; }, 5000);
 }
 
-function setLoading(btnId, loading, text = 'Chargement...') {
+function setLoading(btnId, loading, text) {
+  text = text || 'Chargement...';
   const btn = document.getElementById(btnId);
   if (!btn) return;
   if (loading) {
     btn.disabled = true;
-    btn.dataset.originalText = btn.innerHTML;
-    btn.innerHTML = `<span class="loader"></span> ${text}`;
+    btn.setAttribute('data-original', btn.innerHTML);
+    btn.innerHTML = '<span class="loader"></span> ' + text;
   } else {
     btn.disabled = false;
-    btn.innerHTML = btn.dataset.originalText || btn.innerHTML;
+    btn.innerHTML = btn.getAttribute('data-original') || btn.innerHTML;
   }
 }
 
 function formatDate(dateStr) {
   if (!dateStr) return '';
   try {
-    return new Date(dateStr).toLocaleDateString('fr-FR', { 
-      year: 'numeric', month: 'long', day: 'numeric' 
-    });
+    return new Date(dateStr).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
   } catch(e) { return dateStr; }
 }
 
 function getInitials(name) {
   if (!name) return '??';
-  return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+  return name.split(' ').map(function(n) { return n[0]; }).join('').toUpperCase().substring(0, 2);
 }
 
 function escapeHtml(str) {
@@ -166,25 +119,17 @@ function renderNavbar() {
   AppState.init();
   if (AppState.isLoggedIn()) {
     const dashLink = AppState.isAdmin() ? 'admin.html' : 'auteur.html';
-    actionsEl.innerHTML = `
-      <a href="${dashLink}" class="btn btn-secondary btn-sm">Tableau de bord</a>
-      <div class="avatar" onclick="handleLogout()" title="Déconnexion" style="cursor:pointer;">
-        ${getInitials(AppState.user.username)}
-      </div>
-    `;
+    actionsEl.innerHTML = '<a href="' + dashLink + '" class="btn btn-secondary btn-sm">Tableau de bord</a>' +
+      '<div class="avatar" onclick="handleLogout()" title="Déconnexion" style="cursor:pointer;">' + getInitials(AppState.user.username) + '</div>';
   } else {
-    actionsEl.innerHTML = `
-      <a href="connexion.html" class="btn btn-secondary btn-sm">Se connecter</a>
-      <a href="inscription.html" class="btn btn-primary btn-sm">S'inscrire</a>
-    `;
+    actionsEl.innerHTML = '<a href="connexion.html" class="btn btn-secondary btn-sm">Se connecter</a>' +
+      '<a href="inscription.html" class="btn btn-primary btn-sm">S\'inscrire</a>';
   }
 }
 
 async function handleLogout() {
   try {
-    if (AppState.token) {
-      await API.post({ action: 'logout', sessionToken: AppState.token });
-    }
+    if (AppState.token) await API.post({ action: 'logout', sessionToken: AppState.token });
   } catch(e) {}
   AppState.logout();
   window.location.href = 'index.html';
@@ -193,26 +138,35 @@ async function handleLogout() {
 // ===== MODAL =====
 function openModal(id) {
   const overlay = document.getElementById(id);
-  if (overlay) {
-    overlay.classList.add('active');
-    document.body.style.overflow = 'hidden';
-  }
+  if (overlay) { overlay.classList.add('active'); document.body.style.overflow = 'hidden'; }
 }
 
 function closeModal(id) {
   const overlay = document.getElementById(id);
-  if (overlay) {
-    overlay.classList.remove('active');
-    document.body.style.overflow = '';
-  }
+  if (overlay) { overlay.classList.remove('active'); document.body.style.overflow = ''; }
 }
 
-document.addEventListener('click', (e) => {
+document.addEventListener('click', function(e) {
   if (e.target.classList.contains('modal-overlay')) {
     e.target.classList.remove('active');
     document.body.style.overflow = '';
   }
 });
 
-// ===== INITIALISATION =====
+// ===== TABS =====
+function initTabs(containerSelector) {
+  document.querySelectorAll(containerSelector + ' .tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+      const target = this.dataset.tab;
+      document.querySelectorAll(containerSelector + ' .tab').forEach(function(t) { t.classList.remove('active'); });
+      document.querySelectorAll(containerSelector + ' .tab-content').forEach(function(c) { c.style.display = 'none'; });
+      this.classList.add('active');
+      const content = document.getElementById(target);
+      if (content) content.style.display = 'block';
+    });
+  });
+  const firstTab = document.querySelector(containerSelector + ' .tab');
+  if (firstTab) firstTab.click();
+}
+
 document.addEventListener('DOMContentLoaded', renderNavbar);
