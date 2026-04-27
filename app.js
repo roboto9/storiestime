@@ -1,6 +1,6 @@
 // ===================================================
 // GABON STORIES - JAVASCRIPT PRINCIPAL
-// Version anti-CORS - Utilise GET avec paramètre _data
+// Version anti-CORS corrigée
 // ===================================================
 
 const API_URL = 'https://script.google.com/macros/s/AKfycbyhtcIwite2fwwKjR54E99Ur88kCIosUKSI0oofC7fmoa-c-r8-pep7bIJ_mDJ01KaEBg/exec';
@@ -21,20 +21,16 @@ console.log('📡 API URL:', API_URL);
     console.error('❌ getStats:', e.message);
   }
   
-  // Test login (via GET)
+  // Test login direct
   try {
-    const loginData = JSON.stringify({
-      email: 'mayialex370@gmail.com',
-      password: 'magnifique241'
-    });
-    const url = API_URL + '?action=login&_data=' + encodeURIComponent(loginData);
-    console.log('URL login:', url);
+    const url = API_URL + '?action=login&email=mayialex370@gmail.com&password=magnifique241';
+    console.log('URL test login:', url);
     
     const r = await fetch(url);
     const d = await r.json();
-    console.log('✅ Login:', d);
+    console.log('✅ Login test:', d);
   } catch(e) {
-    console.error('❌ Login:', e.message);
+    console.error('❌ Login test:', e.message);
   }
 })();
 
@@ -72,7 +68,7 @@ const AppState = {
   isAuthor() { return this.user?.role === 'auteur' || this.user?.role === 'admin'; }
 };
 
-// ===== API - TOUT EN GET POUR CONTOURNER CORS =====
+// ===== API - TOUT EN GET AVEC PARAMÈTRES SIMPLES =====
 const API = {
   async get(action, params = {}) {
     try {
@@ -82,11 +78,11 @@ const API = {
         if (v !== null && v !== undefined) url.searchParams.set(k, v.toString());
       });
       
-      console.log('GET:', action);
+      console.log('GET ' + action + ':', url.toString().substring(0, 150) + '...');
       const res = await fetch(url.toString());
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      console.log('Response:', data);
+      console.log('  →', data.success ? '✅' : '❌', data.message || '');
       return data;
     } catch(e) {
       console.error('API GET error:', e);
@@ -96,16 +92,20 @@ const API = {
 
   async post(data) {
     try {
-      // Encoder les données dans l'URL pour éviter CORS
       const url = new URL(API_URL);
-      url.searchParams.set('action', data.action);
-      url.searchParams.set('_data', encodeURIComponent(JSON.stringify(data)));
       
-      console.log('POST via GET:', data.action, url.toString().substring(0, 200) + '...');
+      // Ajouter l'action et tous les champs comme paramètres
+      Object.entries(data).forEach(([k, v]) => {
+        if (v !== null && v !== undefined && v !== '') {
+          url.searchParams.set(k, v.toString());
+        }
+      });
+      
+      console.log('POST ' + data.action + ': ' + url.toString().substring(0, 150) + '...');
       const res = await fetch(url.toString());
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const result = await res.json();
-      console.log('Response:', result);
+      console.log('  →', result.success ? '✅' : '❌', result.message || '');
       return result;
     } catch(e) {
       console.error('API POST error:', e);
