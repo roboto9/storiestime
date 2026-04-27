@@ -2,7 +2,7 @@
 // GABON STORIES - JAVASCRIPT PRINCIPAL
 // ===================================================
 
-const API_URL = 'https://script.google.com/macros/s/AKfycbyhtcIwite2fwwKjR54E99Ur88kCIosUKSI0oofC7fmoa-c-r8-pep7bIJ_mDJ01KaEBg/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbwcGDU5SiMQk52_tFMIFUHZO8Y4uZIRQsYpOI_H17gUrl132pkJqudvpl34sr4U6cPo1A/exec';
 
 // ===== GESTION DE L'ÉTAT =====
 const AppState = {
